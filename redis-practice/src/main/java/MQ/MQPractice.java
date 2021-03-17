@@ -9,15 +9,31 @@ import java.util.Properties;
 
 public class MQPractice {
     private static JedisPool pool = null;
-    static{
-        InputStream in = MQPractice.class.getResourceAsStream("redis.property");
+    static {
+        InputStream in = MQPractice.class.getClassLoader().getResourceAsStream("redis.property");
         Properties prop = new Properties();
         try {
             prop.load(in);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxWaitMillis(Long.valueOf(prop.getProperty("redis.maxWait")));
+        poolConfig.setMaxIdle(Integer.valueOf(prop.getProperty("redis.maxIdle")));
+        poolConfig.setMinIdle(Integer.valueOf(prop.getProperty("redis.minIdle")));
+        poolConfig.setMaxTotal(Integer.valueOf(prop.getProperty("redis.maxTotal")));
+        pool = new JedisPool(poolConfig,prop.getProperty("redis.url"),Integer.valueOf(prop.getProperty("redis.port")));
     }
+    public static Jedis getJedis(){
+        return pool.getResource();
+    }
+
+    public static void main(String[] args) {
+        Jedis j = getJedis();
+        System.out.println(j);
+    }
+
+
 
 
 
